@@ -1,0 +1,26 @@
+﻿using Microsoft.EntityFrameworkCore;
+using Pcf.Administration.Core.Domain.Administration;
+
+namespace Pcf.Administration.DataAccess
+{
+	public class DataContext : DbContext
+	{
+        public DbSet<Employee> Employees;
+        public DbSet<Role> Roles;
+        public DataContext()
+        {
+            
+        }
+        public DataContext(DbContextOptions<DataContext> options) : base(options)
+        {
+            
+        }
+
+		protected override void OnModelCreating(ModelBuilder modelBuilder)
+		{
+			base.OnModelCreating(modelBuilder);
+			modelBuilder.Entity<Employee>();
+			modelBuilder.Entity<Role>();
+		}
+	}
+}
