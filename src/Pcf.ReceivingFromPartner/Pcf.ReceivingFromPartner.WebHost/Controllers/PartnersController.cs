@@ -39,69 +39,73 @@ namespace Pcf.ReceivingFromPartner.WebHost.Controllers
             _administrationGateway = administrationGateway;
         }
 
-        /// <summary>
-        /// Get All Partners
-        /// </summary>
-        [HttpGet]
-        public async Task<ActionResult<List<PartnerResponse>>> GetPartnersAsync()
-        {
-            var partners = await _partnersRepository.GetAllAsync();
+		/// <summary>
+		/// Get All Partners
+		/// </summary>
+		[HttpGet]
+		public async Task<ActionResult<List<PartnerResponse>>> GetPartnersAsync()
+		{
+			var partners = await _partnersRepository.GetAllAsync();
 
-            var response = partners.Select(x => new PartnerResponse()
-            {
-                Id = x.Id,
-                Name = x.Name,
-                NumberIssuedPromoCodes = x.NumberIssuedPromoCodes,
-                IsActive = true,
-                PartnerLimits = x.PartnerLimits
-                    .Select(y => new PartnerPromoCodeLimitResponse()
-                    {
-                        Id = y.Id,
-                        PartnerId = y.PartnerId,
-                        Limit = y.Limit,
-                        CreateDate = y.CreateDate.ToString("dd.MM.yyyy hh:mm:ss"),
-                        EndDate = y.EndDate.ToString("dd.MM.yyyy hh:mm:ss"),
-                        CancelDate = y.CancelDate?.ToString("dd.MM.yyyy hh:mm:ss"),
-                    }).ToList()
-            });
+			if (partners == null || !partners.Any())
+			{
+				return Ok(new List<PartnerResponse>()); 
+			}
 
-            return Ok(response);
-        }
-        
-        /// <summary>
-        /// Get All Partner's Information
-        /// </summary>
-        /// <param name="id">Partner Id, <example>20d2d612-db93-4ed5-86b1-ff2413bca655</example></param>
-        [HttpGet("{id:guid}")]
-        public async Task<ActionResult<List<PartnerResponse>>> GetPartnersAsync(Guid id)
-        {
-            var partner = await _partnersRepository.GetByIdAsync(id);
+			var response = partners.Select(x => new PartnerResponse()
+			{
+				Id = x.Id,
+				Name = x.Name,
+				NumberIssuedPromoCodes = x.NumberIssuedPromoCodes,
+				IsActive = true,
+				PartnerLimits = x.PartnerLimits?.Select(y => new PartnerPromoCodeLimitResponse()
+				{
+					Id = y.Id,
+					PartnerId = y.PartnerId,
+					Limit = y.Limit,
+					CreateDate = y.CreateDate.ToString("dd.MM.yyyy hh:mm:ss"),
+					EndDate = y.EndDate.ToString("dd.MM.yyyy hh:mm:ss"),
+					CancelDate = y.CancelDate?.ToString("dd.MM.yyyy hh:mm:ss"),
+				}).ToList() ?? new List<PartnerPromoCodeLimitResponse>()
+			}).ToList();
 
-            if (partner == null)
-            {
-                return NotFound();
-            }
+			return Ok(response);
+		}
 
-            var response = new PartnerResponse()
-            {
-                Id = partner.Id,
-                Name = partner.Name,
-                NumberIssuedPromoCodes = partner.NumberIssuedPromoCodes,
-                IsActive = true,
-                PartnerLimits = partner.PartnerLimits
-                    .Select(y => new PartnerPromoCodeLimitResponse()
-                    {
-                        Id = y.Id,
-                        PartnerId = y.PartnerId,
-                        Limit = y.Limit,
-                        CreateDate = y.CreateDate.ToString("dd.MM.yyyy hh:mm:ss"),
-                        EndDate = y.EndDate.ToString("dd.MM.yyyy hh:mm:ss"),
-                        CancelDate = y.CancelDate?.ToString("dd.MM.yyyy hh:mm:ss"),
-                    }).ToList()
-            };
 
-            return Ok(response);
-        }
+		/// <summary>
+		/// Get All Partner's Information
+		/// </summary>
+		/// <param name="id">Partner Id, <example>20d2d612-db93-4ed5-86b1-ff2413bca655</example></param>
+		[HttpGet("{id:guid}")]
+		public async Task<ActionResult<PartnerResponse>> GetPartnersAsync(Guid id)
+		{
+			var partner = await _partnersRepository.GetByIdAsync(id);
+
+			if (partner == null)
+			{
+				return NotFound();
+			}
+
+			var response = new PartnerResponse()
+			{
+				Id = partner.Id,
+				Name = partner.Name,
+				NumberIssuedPromoCodes = partner.NumberIssuedPromoCodes,
+				IsActive = true,
+				PartnerLimits = partner.PartnerLimits?.Select(y => new PartnerPromoCodeLimitResponse()
+				{
+					Id = y.Id,
+					PartnerId = y.PartnerId,
+					Limit = y.Limit,
+					CreateDate = y.CreateDate.ToString("dd.MM.yyyy hh:mm:ss"),
+					EndDate = y.EndDate.ToString("dd.MM.yyyy hh:mm:ss"),
+					CancelDate = y.CancelDate?.ToString("dd.MM.yyyy hh:mm:ss"),
+				}).ToList() ?? new List<PartnerPromoCodeLimitResponse>()
+			};
+
+			return Ok(response);
+		}
 
 		/// <summary>
 		/// Set Partner Promo Code Limit
@@ -214,29 +218,29 @@ namespace Pcf.ReceivingFromPartner.WebHost.Controllers
 		/// </summary>
 		/// <returns></returns>
 		[HttpGet("{id:guid}/promocodes")]
-        public async Task<IActionResult> GetPartnerPromoCodesAsync(Guid id)
-        {
-            var partner = await _partnersRepository.GetByIdAsync(id);
-            
-            if (partner == null)
-            {
-                return NotFound("Parner is null");
-            }
-            
-            var response = partner.PromoCodes
-                .Select(x => new PromoCodeShortResponse()
-            {
-                Id = x.Id,
-                Code = x.Code,
-                BeginDate = x.BeginDate.ToString("yyyy-MM-dd"),
-                EndDate = x.EndDate.ToString("yyyy-MM-dd"),
-                PartnerName = x.Partner.Name,
-                PartnerId = x.PartnerId,
-                ServiceInfo = x.ServiceInfo
-            }).ToList();
+		public async Task<IActionResult> GetPartnerPromoCodesAsync(Guid id)
+		{
+			var partner = await _partnersRepository.GetByIdAsync(id);
 
-            return Ok(response);
-        }
+			if (partner == null)
+			{
+				return NotFound("Partner not found");
+			}
+
+			var response = partner.PromoCodes?.Select(x => new PromoCodeShortResponse()
+			{
+				Id = x.Id,
+				Code = x.Code,
+				BeginDate = x.BeginDate.ToString("yyyy-MM-dd"),
+				EndDate = x.EndDate.ToString("yyyy-MM-dd"),
+				PartnerName = x.Partner.Name,
+				PartnerId = x.PartnerId,
+				ServiceInfo = x.ServiceInfo
+			}).ToList() ?? new List<PromoCodeShortResponse>();
+
+			return Ok(response);
+		}
+
 
 		/// <summary>
 		/// Get Partner PromoCode

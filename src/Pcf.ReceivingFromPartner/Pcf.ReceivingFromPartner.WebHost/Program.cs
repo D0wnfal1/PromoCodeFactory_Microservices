@@ -33,31 +33,31 @@ builder.Services.AddDbContext<DataContext>(x =>
 });
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddOpenApiDocument(options =>
+{
+	options.Title = "PromoCode Factory Receiving From Partner API Doc";
+	options.Version = "1.0";
+});
 
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-	app.UseSwagger();
-	app.UseSwaggerUI();
-}
+//if (app.Environment.IsDevelopment())
+//{
 
+//}
+app.UseOpenApi();
+app.UseSwaggerUI();
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
 
 app.MapControllers();
-void SeedDatabase()
-{
-	using (var scope = app.Services.CreateScope())
-	{
-		var dbInitializer = scope.ServiceProvider.GetRequiredService<IDbInitializer>();
-		dbInitializer.InitializeDb();
-	}
-}
 
-SeedDatabase();
+//using (var scope = app.Services.CreateScope())
+//{
+//	var dbInitializer = scope.ServiceProvider.GetRequiredService<IDbInitializer>();
+//	dbInitializer.InitializeDb();
+//}
 
 app.Run();

@@ -5,9 +5,9 @@ namespace Pcf.Administration.DataAccess
 {
 	public class DataContext : DbContext
 	{
-        public DbSet<Employee> Employees;
-        public DbSet<Role> Roles;
-        public DataContext()
+		public DbSet<Employee> Employees { get; set; }
+		public DbSet<Role> Roles { get; set; }
+		public DataContext()
         {
             
         }

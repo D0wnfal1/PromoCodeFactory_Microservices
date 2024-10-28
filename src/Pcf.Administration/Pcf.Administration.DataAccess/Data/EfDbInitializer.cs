@@ -7,13 +7,16 @@
         {
             _dataContext = dataContext;
         }
-        public void Initialize()
+        public void InitializeDb()
 		{
-			_dataContext.Database.EnsureDeleted();
+			if (_dataContext.Database.CanConnect())
+			{
+				_dataContext.Database.EnsureDeleted();
+			}
+
 			_dataContext.Database.EnsureCreated();
 
 			_dataContext.AddRange(FakeDataFactory.Employees);
-			_dataContext.AddRange(FakeDataFactory.Roles);
 			_dataContext.SaveChanges();
 		}
 	}

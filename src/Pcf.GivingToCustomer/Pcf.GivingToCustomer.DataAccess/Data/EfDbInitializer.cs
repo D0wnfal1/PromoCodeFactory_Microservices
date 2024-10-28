@@ -17,7 +17,11 @@ namespace Pcf.GivingToCustomer.DataAccess.Data
 
 		public void InitializeDb()
 		{
-			_dataContext.Database.EnsureDeleted();
+			if (_dataContext.Database.CanConnect())
+			{
+				_dataContext.Database.EnsureDeleted();
+			}
+
 			_dataContext.Database.EnsureCreated();
 
 			_dataContext.AddRange(FakeDataFactory.Preferences);
