@@ -1,13 +1,9 @@
-﻿using Pcf.GivingToCustomer.Core.Domain;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿
+using Pcf.GivingToCustomer.Core.Domain;
 
-namespace Pcf.GivingToCustomer.DataAccess.Data
+namespace Pcf.GivingtoCustomer.IntegrationTests.Data
 {
-	public static class FakeDataFactory
+	public static class TestDataFactory
 	{
 		public static List<Preference> Preferences => new List<Preference>()
 		{
