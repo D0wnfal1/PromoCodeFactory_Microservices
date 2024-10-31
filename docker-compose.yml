@@ -5,7 +5,7 @@ services:
     container_name: 'promocode-factory-administration-api'
     restart: always
     ports:
-      - "8091:80"
+      - "5583:8080"
     environment:
       - "ConnectionStrings:PromocodeFactoryAdministrationDb=Host=localhost;Database=promocode_factory_administration_db;User Id=postgres;Password=147258469"          
     depends_on: 
@@ -26,7 +26,7 @@ services:
     container_name: 'promocode-factory-receiving-from-partner-api'
     restart: always
     ports:
-      - "8092:80"
+      - "5581:8080"
     environment:
       - "ConnectionStrings:PromocodeFactoryReceivingFromPartnerDb=Host=localhost;Database=promocode_factory_receiving_from_partner_db;User Id=postgres;Password=147258469"
       - "IntegrationSettings:GivingToCustomerApiUrl=http://promocode-factory-giving-to-customer-api"    
@@ -49,7 +49,7 @@ services:
     container_name: 'promocode-factory-giving-to-customer-api'
     restart: always
     ports:
-      - "8093:80"
+      - "5582:8080"
     environment:
       - "ConnectionStrings:PromocodeFactoryGivingToCustomerDb=Host=localhost;Database=promocode_factory_giving_to_customer_db;User Id=postgres;Password=147258469"          
     depends_on: 
