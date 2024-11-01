@@ -1,4 +1,6 @@
 ﻿
+using MongoDB.Bson;
+
 namespace Pcf.ReceivingFromPartner.Core.Domain
 {
     public class PromoCode
@@ -8,28 +10,18 @@ namespace Pcf.ReceivingFromPartner.Core.Domain
 
         public string ServiceInfo { get; set; }
 
-		private DateTime _beginDate;
-		public DateTime BeginDate
-		{
-			get => _beginDate;
-			set => _beginDate = DateTime.SpecifyKind(value, DateTimeKind.Utc);
-		}
+        public DateTime BeginDate { get; set; }
 
-		private DateTime _endDate;
-		public DateTime EndDate
-		{
-			get => _endDate;
-			set => _endDate = DateTime.SpecifyKind(value, DateTimeKind.Utc);
-		}
+        public DateTime EndDate { get; set; }
 
-		public Guid PartnerId { get; set; }
+        public ObjectId PartnerId { get; set; }
 
         public virtual Partner Partner { get; set; }
         
-        public Guid? PartnerManagerId { get; set; }
+        public ObjectId? PartnerManagerId { get; set; }
         
         public virtual Preference Preference { get; set; }
 
-        public Guid PreferenceId { get; set; }
+        public ObjectId PreferenceId { get; set; }
     }
 }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MongoDB.Bson;
+using System;
 
 namespace Pcf.ReceivingFromPartner.Integration.Dto
 {
@@ -6,18 +7,18 @@ namespace Pcf.ReceivingFromPartner.Integration.Dto
     {
         public string ServiceInfo { get; set; }
 
-        public Guid PartnerId { get; set; }
+        public ObjectId PartnerId { get; set; }
 
-        public Guid PromoCodeId { get; set; }
+        public ObjectId PromoCodeId { get; set; }
         
         public string PromoCode { get; set; }
 
-        public Guid PreferenceId { get; set; }
+        public ObjectId PreferenceId { get; set; }
 
         public string BeginDate { get; set; }
 
         public string EndDate { get; set; }
         
-        public Guid? PartnerManagerId { get; set; }
+        public ObjectId? PartnerManagerId { get; set; }
     }
 }

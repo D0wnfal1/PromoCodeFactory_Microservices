@@ -1,44 +1,22 @@
 ﻿
+using MongoDB.Bson;
+
 namespace Pcf.ReceivingFromPartner.Core.Domain
 {
     public class 
         PartnerPromoCodeLimit : BaseEntity
     {
-		public Guid PartnerId { get; set; }
 
-		public virtual Partner Partner { get; set; }
+        public ObjectId PartnerId { get; set; }
 
-		private DateTime _createDate;
-		public DateTime CreateDate
-		{
-			get => _createDate;
-			set => _createDate = DateTime.SpecifyKind(value, DateTimeKind.Utc);
-		}
+        public virtual Partner Partner { get; set; }
+        
+        public DateTime CreateDate { get; set; }
 
-		private DateTime? _cancelDate;
-		public DateTime? CancelDate
-		{
-			get => _cancelDate;
-			set
-			{
-				if (value.HasValue)
-				{
-					_cancelDate = DateTime.SpecifyKind(value.Value, DateTimeKind.Utc);
-				}
-				else
-				{
-					_cancelDate = null;
-				}
-			}
-		}
+        public DateTime? CancelDate { get; set; }
 
-		private DateTime _endDate;
-		public DateTime EndDate
-		{
-			get => _endDate;
-			set => _endDate = DateTime.SpecifyKind(value, DateTimeKind.Utc);
-		}
+        public DateTime EndDate { get; set; }
 
-		public int Limit { get; set; }
-	}
+        public int Limit { get; set; }
+    }
 }

@@ -22,7 +22,7 @@ namespace Pcf.Administration.IntegrationTests.Data
 			_dataContext.Database.EnsureDeleted();
 		}
 
-		public void Initialize()
+		public void InitializeDb()
 		{
 			_dataContext.Database.EnsureDeleted();
 			_dataContext.Database.EnsureCreated();

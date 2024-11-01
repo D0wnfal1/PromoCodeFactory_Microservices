@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using MongoDB.Bson;
 using Pcf.ReceivingFromPartner.Core.Abstractions.Gateways;
 using Pcf.ReceivingFromPartner.Core.Abstractions.Repositories;
 using Pcf.ReceivingFromPartner.Core.Domain;
@@ -39,79 +40,75 @@ namespace Pcf.ReceivingFromPartner.WebHost.Controllers
             _administrationGateway = administrationGateway;
         }
 
-		/// <summary>
-		/// Get All Partners
-		/// </summary>
-		[HttpGet]
-		public async Task<ActionResult<List<PartnerResponse>>> GetPartnersAsync()
-		{
-			var partners = await _partnersRepository.GetAllAsync();
+        /// <summary>
+        /// Get All Partners
+        /// </summary>
+        [HttpGet]
+        public async Task<ActionResult<List<PartnerResponse>>> GetPartnersAsync()
+        {
+            var partners = await _partnersRepository.GetAllAsync();
 
-			if (partners == null || !partners.Any())
-			{
-				return Ok(new List<PartnerResponse>()); 
-			}
+            var response = partners.Select(x => new PartnerResponse()
+            {
+                Id = x.Id,
+                Name = x.Name,
+                NumberIssuedPromoCodes = x.NumberIssuedPromoCodes,
+                IsActive = true,
+                PartnerLimits = x.PartnerLimits
+                    .Select(y => new PartnerPromoCodeLimitResponse()
+                    {
+                        Id = y.Id,
+                        PartnerId = y.PartnerId,
+                        Limit = y.Limit,
+                        CreateDate = y.CreateDate.ToString("dd.MM.yyyy hh:mm:ss"),
+                        EndDate = y.EndDate.ToString("dd.MM.yyyy hh:mm:ss"),
+                        CancelDate = y.CancelDate?.ToString("dd.MM.yyyy hh:mm:ss"),
+                    }).ToList()
+            });
 
-			var response = partners.Select(x => new PartnerResponse()
-			{
-				Id = x.Id,
-				Name = x.Name,
-				NumberIssuedPromoCodes = x.NumberIssuedPromoCodes,
-				IsActive = true,
-				PartnerLimits = x.PartnerLimits?.Select(y => new PartnerPromoCodeLimitResponse()
-				{
-					Id = y.Id,
-					PartnerId = y.PartnerId,
-					Limit = y.Limit,
-					CreateDate = y.CreateDate.ToString("dd.MM.yyyy hh:mm:ss"),
-					EndDate = y.EndDate.ToString("dd.MM.yyyy hh:mm:ss"),
-					CancelDate = y.CancelDate?.ToString("dd.MM.yyyy hh:mm:ss"),
-				}).ToList() ?? new List<PartnerPromoCodeLimitResponse>()
-			}).ToList();
+            return Ok(response);
+        }
+        
+        /// <summary>
+        /// Get All Partner's Information
+        /// </summary>
+        /// <param name="id">Partner Id, <example>20d2d612-db93-4ed5-86b1-ff2413bca655</example></param>
+        [HttpGet("{id:guid}")]
+        public async Task<ActionResult<List<PartnerResponse>>> GetPartnersAsync(ObjectId id)
+        {
+            var partner = await _partnersRepository.GetByIdAsync(id);
 
-			return Ok(response);
-		}
+            if (partner == null)
+            {
+                return NotFound();
+            }
 
+            var response = new PartnerResponse()
+            {
+                Id = partner.Id,
+                Name = partner.Name,
+                NumberIssuedPromoCodes = partner.NumberIssuedPromoCodes,
+                IsActive = true,
+                PartnerLimits = partner.PartnerLimits
+                    .Select(y => new PartnerPromoCodeLimitResponse()
+                    {
+                        Id = y.Id,
+                        PartnerId = y.PartnerId,
+                        Limit = y.Limit,
+                        CreateDate = y.CreateDate.ToString("dd.MM.yyyy hh:mm:ss"),
+                        EndDate = y.EndDate.ToString("dd.MM.yyyy hh:mm:ss"),
+                        CancelDate = y.CancelDate?.ToString("dd.MM.yyyy hh:mm:ss"),
+                    }).ToList()
+            };
 
-		/// <summary>
-		/// Get All Partner's Information
-		/// </summary>
-		/// <param name="id">Partner Id, <example>20d2d612-db93-4ed5-86b1-ff2413bca655</example></param>
-		[HttpGet("{id:guid}")]
-		public async Task<ActionResult<PartnerResponse>> GetPartnersAsync(Guid id)
-		{
-			var partner = await _partnersRepository.GetByIdAsync(id);
-
-			if (partner == null)
-			{
-				return NotFound();
-			}
-
-			var response = new PartnerResponse()
-			{
-				Id = partner.Id,
-				Name = partner.Name,
-				NumberIssuedPromoCodes = partner.NumberIssuedPromoCodes,
-				IsActive = true,
-				PartnerLimits = partner.PartnerLimits?.Select(y => new PartnerPromoCodeLimitResponse()
-				{
-					Id = y.Id,
-					PartnerId = y.PartnerId,
-					Limit = y.Limit,
-					CreateDate = y.CreateDate.ToString("dd.MM.yyyy hh:mm:ss"),
-					EndDate = y.EndDate.ToString("dd.MM.yyyy hh:mm:ss"),
-					CancelDate = y.CancelDate?.ToString("dd.MM.yyyy hh:mm:ss"),
-				}).ToList() ?? new List<PartnerPromoCodeLimitResponse>()
-			};
-
-			return Ok(response);
-		}
+            return Ok(response);
+        }
 
 		/// <summary>
 		/// Set Partner Promo Code Limit
 		/// </summary>
 		[HttpPost("{id:guid}/limits")]
-        public async Task<IActionResult> SetPartnerPromoCodeLimitAsync(Guid id, SetPartnerPromoCodeLimitRequest request)
+        public async Task<IActionResult> SetPartnerPromoCodeLimitAsync(ObjectId id, SetPartnerPromoCodeLimitRequest request)
         {
             var partner = await _partnersRepository.GetByIdAsync(id);
 
@@ -159,7 +156,7 @@ namespace Pcf.ReceivingFromPartner.WebHost.Controllers
 		/// <param name="id">Partner Id, <example>20d2d612-db93-4ed5-86b1-ff2413bca655</example></param>
 		/// <param name="limitId">Limit Id, <example>93f3a79d-e9f9-47e6-98bb-1f618db43230</example></param>
 		[HttpGet("{id:guid}/limits/{limitId:guid}")]
-        public async Task<ActionResult<PartnerPromoCodeLimit>> GetPartnerLimitAsync(Guid id, Guid limitId)
+        public async Task<ActionResult<PartnerPromoCodeLimit>> GetPartnerLimitAsync(ObjectId id, ObjectId limitId)
         {
             var partner = await _partnersRepository.GetByIdAsync(id);
 
@@ -187,7 +184,7 @@ namespace Pcf.ReceivingFromPartner.WebHost.Controllers
 		/// </summary>
 		/// <param name="id">partner Id, <example>0da65561-cf56-4942-bff2-22f50cf70d43</example></param>
 		[HttpPost("{id:guid}/canceledLimits")]
-        public async Task<IActionResult> CancelPartnerPromoCodeLimitAsync(Guid id)
+        public async Task<IActionResult> CancelPartnerPromoCodeLimitAsync(ObjectId id)
         {
             var partner = await _partnersRepository.GetByIdAsync(id);
             
@@ -218,36 +215,36 @@ namespace Pcf.ReceivingFromPartner.WebHost.Controllers
 		/// </summary>
 		/// <returns></returns>
 		[HttpGet("{id:guid}/promocodes")]
-		public async Task<IActionResult> GetPartnerPromoCodesAsync(Guid id)
-		{
-			var partner = await _partnersRepository.GetByIdAsync(id);
+        public async Task<IActionResult> GetPartnerPromoCodesAsync(ObjectId id)
+        {
+            var partner = await _partnersRepository.GetByIdAsync(id);
+            
+            if (partner == null)
+            {
+                return NotFound("Parner is null");
+            }
+            
+            var response = partner.PromoCodes
+                .Select(x => new PromoCodeShortResponse()
+            {
+                Id = x.Id,
+                Code = x.Code,
+                BeginDate = x.BeginDate.ToString("yyyy-MM-dd"),
+                EndDate = x.EndDate.ToString("yyyy-MM-dd"),
+                PartnerName = x.Partner.Name,
+                PartnerId = x.PartnerId,
+                ServiceInfo = x.ServiceInfo
+            }).ToList();
 
-			if (partner == null)
-			{
-				return NotFound("Partner not found");
-			}
-
-			var response = partner.PromoCodes?.Select(x => new PromoCodeShortResponse()
-			{
-				Id = x.Id,
-				Code = x.Code,
-				BeginDate = x.BeginDate.ToString("yyyy-MM-dd"),
-				EndDate = x.EndDate.ToString("yyyy-MM-dd"),
-				PartnerName = x.Partner.Name,
-				PartnerId = x.PartnerId,
-				ServiceInfo = x.ServiceInfo
-			}).ToList() ?? new List<PromoCodeShortResponse>();
-
-			return Ok(response);
-		}
-
+            return Ok(response);
+        }
 
 		/// <summary>
 		/// Get Partner PromoCode
 		/// </summary>
 		/// <returns></returns>
 		[HttpGet("{id:guid}/promocodes/{promoCodeId:guid}")]
-        public async Task<IActionResult> GetPartnerPromoCodeAsync(Guid id, Guid promoCodeId)
+        public async Task<IActionResult> GetPartnerPromoCodeAsync(ObjectId id, ObjectId promoCodeId)
         {
             var partner = await _partnersRepository.GetByIdAsync(id);
             
@@ -284,7 +281,7 @@ namespace Pcf.ReceivingFromPartner.WebHost.Controllers
         /// <param name="request">Данные запроса/example></param>
         /// <returns></returns>
         [HttpPost("{id:guid}/promocodes")]
-        public async Task<IActionResult> ReceivePromoCodeFromPartnerWithPreferenceAsync(Guid id,
+        public async Task<IActionResult> ReceivePromoCodeFromPartnerWithPreferenceAsync(ObjectId id,
             ReceivingPromoCodeRequest request)
         {
             var partner = await _partnersRepository.GetByIdAsync(id);

@@ -18,7 +18,7 @@ namespace Pcf.Administration.IntegrationTests
 			DbContext = new TestDataContext();
 
 			_efTestDbInitializer = new EfTestDbInitializer(DbContext);
-			_efTestDbInitializer.Initialize();
+			_efTestDbInitializer.InitializeDb();
 		}
 
 		public void Dispose()

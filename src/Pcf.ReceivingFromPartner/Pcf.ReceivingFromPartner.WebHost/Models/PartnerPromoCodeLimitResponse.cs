@@ -1,12 +1,13 @@
-﻿using System;
+﻿using MongoDB.Bson;
+using System;
 
 namespace Pcf.ReceivingFromPartner.WebHost.Models
 {
     public class PartnerPromoCodeLimitResponse
     {
-        public Guid Id { get; set; }
+        public ObjectId Id { get; set; }
 
-        public Guid PartnerId { get; set; }
+        public ObjectId PartnerId { get; set; }
 
         public string CreateDate { get; set; }
 

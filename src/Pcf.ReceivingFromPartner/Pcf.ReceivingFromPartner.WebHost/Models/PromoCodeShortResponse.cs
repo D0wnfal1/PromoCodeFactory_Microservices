@@ -1,10 +1,11 @@
-﻿using System;
+﻿using MongoDB.Bson;
+using System;
 
 namespace Pcf.ReceivingFromPartner.WebHost.Models
 {
     public class PromoCodeShortResponse
     {
-        public Guid Id { get; set; }
+        public ObjectId Id { get; set; }
         
         public string Code { get; set; }
 
@@ -14,7 +15,7 @@ namespace Pcf.ReceivingFromPartner.WebHost.Models
 
         public string EndDate { get; set; }
         
-        public Guid PartnerId { get; set; }
+        public ObjectId PartnerId { get; set; }
 
         public string PartnerName { get; set; }
     }
