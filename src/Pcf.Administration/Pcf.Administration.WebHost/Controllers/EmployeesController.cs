@@ -1,7 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Distributed;
 using Pcf.Administration.Core.Abstractions.Repositories;
 using Pcf.Administration.Core.Domain.Administration;
 using Pcf.Administration.WebHost.Models;
+using System.Text.Json;
 
 namespace Pcf.Administration.WebHost.Controllers
 {
@@ -13,10 +15,12 @@ namespace Pcf.Administration.WebHost.Controllers
 	public class EmployeesController : ControllerBase
 	{
 		private readonly IRepository<Employee> _employeeRepository;
+		private readonly IDistributedCache _cache;
 
-		public EmployeesController(IRepository<Employee> employeeRepository)
+		public EmployeesController(IRepository<Employee> employeeRepository, IDistributedCache cache)
 		{
 			_employeeRepository = employeeRepository;
+			_cache = cache;
 		}
 
 		/// <summary>
@@ -26,17 +30,27 @@ namespace Pcf.Administration.WebHost.Controllers
 		[HttpGet]
 		public async Task<List<EmployeeShortResponse>> GetEmployeesAsync()
 		{
-			var employees = await _employeeRepository.GetAllAsync();
+			var cacheKey = "employeesList";
+			var employeesModelList = await _cache.GetStringAsync(cacheKey);
 
-			var employeesModelList = employees.Select(x =>
-				new EmployeeShortResponse()
-				{
-					Id = x.Id,
-					Email = x.Email,
-					FullName = x.FullName,
-				}).ToList();
+			if (string.IsNullOrEmpty(employeesModelList))
+			{
+				var employees = await _employeeRepository.GetAllAsync();
+				employeesModelList = JsonSerializer.Serialize(employees.Select(x =>
+					new EmployeeShortResponse()
+					{
+						Id = x.Id,
+						Email = x.Email,
+						FullName = x.FullName,
+					}).ToList());
 
-			return employeesModelList;
+				var options = new DistributedCacheEntryOptions()
+					.SetSlidingExpiration(TimeSpan.FromMinutes(5)); 
+
+				await _cache.SetStringAsync(cacheKey, employeesModelList, options);
+			}
+
+			return JsonSerializer.Deserialize<List<EmployeeShortResponse>>(employeesModelList);
 		}
 
 		/// <summary>
