@@ -64,6 +64,5 @@ void SeedDatabase()
 SeedDatabase();
 
 
-SeedDatabase();
 
 app.Run();

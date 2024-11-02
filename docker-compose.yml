@@ -1,5 +1,5 @@
 services:
-  #Administration Api
+  # Administration Api
   promocode-factory-administration-api:
     build: src/Pcf.Administration/
     container_name: 'promocode-factory-administration-api'
@@ -7,20 +7,25 @@ services:
     ports:
       - "5583:8080"
     environment:
-      - "ConnectionStrings:PromocodeFactoryAdministrationDb=Host=localhost;Database=promocode_factory_administration_db;User Id=postgres;Password=147258469"          
+      - "ConnectionStrings:PromocodeFactoryAdministrationDb=Host=promocode-factory-administration-db;Database=promocode_factory_administration_db;Username=postgres;Password=docker" 
+      - "Redis:ConnectionString=promocode-factory-redis:6379" 
     depends_on: 
       - promocode-factory-administration-db
-  #Administration Db
+      - promocode-factory-redis
+
+  # Administration Db
   promocode-factory-administration-db:
-    image: "postgres:9.6.17"
+    image: "postgres:latest"
     container_name: 'promocode-factory-administration-db'
     restart: always 
     ports:
       - 5433:5432
     environment: 
-      - POSTGRES_PASSWORD=147258469
+      - POSTGRES_PASSWORD=docker
+      - POSTGRES_USER=postgres
+      - POSTGRES_DB=promocode_factory_administration_db
 
-  #ReceivingFromPartner Api
+  # ReceivingFromPartner Api
   promocode-factory-receiving-from-partner-api:
     build: src/Pcf.ReceivingFromPartner/
     container_name: 'promocode-factory-receiving-from-partner-api'
@@ -28,22 +33,23 @@ services:
     ports:
       - "5581:8080"
     environment:
-      - "ConnectionStrings:PromocodeFactoryReceivingFromPartnerDb=Host=localhost;Database=promocode_factory_receiving_from_partner_db;User Id=postgres;Password=147258469"
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__MongoDb=mongodb://promocode-factory-receiving-from-partner-db:27017
       - "IntegrationSettings:GivingToCustomerApiUrl=http://promocode-factory-giving-to-customer-api"    
       - "IntegrationSettings:AdministrationApiUrl=http://promocode-factory-administration-api"       
     depends_on: 
       - promocode-factory-receiving-from-partner-db
-  #ReceivingFromPartner Db
+
+  # ReceivingFromPartner Db (MongoDB)
   promocode-factory-receiving-from-partner-db:
-    image: "postgres:9.6.17"
+    image: "mongo:latest"
     container_name: 'promocode-factory-receiving-from-partner-db'
-    restart: always 
+    environment:
+      - MONGO_INITDB_DATABASE=promocode_factory_receivingFromPartner_mongodb
     ports:
-      - 5434:5432
-    environment: 
-      - POSTGRES_PASSWORD=147258469
-  
-  #GivingToCustomer Api
+      - 27017:27017
+
+  # GivingToCustomer Api
   promocode-factory-giving-to-customer-api:
     build: src/Pcf.GivingToCustomer/
     container_name: 'promocode-factory-giving-to-customer-api'
@@ -51,15 +57,32 @@ services:
     ports:
       - "5582:8080"
     environment:
-      - "ConnectionStrings:PromocodeFactoryGivingToCustomerDb=Host=localhost;Database=promocode_factory_giving_to_customer_db;User Id=postgres;Password=147258469"          
-    depends_on: 
+      - ASPNETCORE_ENVIRONMENT=Development
+      - "ConnectionStrings:PromocodeFactoryGivingToCustomerDb=Host=promocode-factory-giving-to-customer-db;Database=promocode_factory_giving_to_customer_db;Username=postgres;Password=docker"
+    depends_on:
       - promocode-factory-giving-to-customer-db
-  #GivingToCustomer Db
+
+  # GivingToCustomer Db
   promocode-factory-giving-to-customer-db:
-    image: "postgres:9.6.17"
+    image: "postgres:latest"
     container_name: 'promocode-factory-giving-to-customer-db'
-    restart: always 
+    restart: always
     ports:
       - 5435:5432
-    environment: 
-      - POSTGRES_PASSWORD=147258469
+    environment:
+      - POSTGRES_PASSWORD=docker
+      - POSTGRES_USER=postgres
+      - POSTGRES_DB=promocode_factory_giving_to_customer_db
+
+  # Redis service
+  promocode-factory-redis:
+    image: "redis:alpine"
+    container_name: 'promocode-factory-redis'
+    restart: always 
+    ports:
+      - 6379:6379
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 5

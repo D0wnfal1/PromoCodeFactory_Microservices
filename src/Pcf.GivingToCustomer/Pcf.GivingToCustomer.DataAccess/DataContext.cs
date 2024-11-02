@@ -22,11 +22,7 @@ namespace Pcf.GivingToCustomer.DataAccess
 		protected override void OnModelCreating(ModelBuilder modelBuilder)
 		{
 			modelBuilder.Entity<CustomerPreference>()
-				.HasKey(bc => new
-				{
-					bc.CustomerId,
-					bc.PreferenceId,
-				});
+							.HasKey(bc => new { bc.CustomerId, bc.PreferenceId });
 			modelBuilder.Entity<CustomerPreference>()
 				.HasOne(bc => bc.Customer)
 				.WithMany(b => b.Preferences)

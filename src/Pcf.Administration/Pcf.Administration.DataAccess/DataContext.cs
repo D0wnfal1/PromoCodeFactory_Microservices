@@ -18,9 +18,6 @@ namespace Pcf.Administration.DataAccess
 
 		protected override void OnModelCreating(ModelBuilder modelBuilder)
 		{
-			base.OnModelCreating(modelBuilder);
-			modelBuilder.Entity<Employee>();
-			modelBuilder.Entity<Role>();
 		}
 	}
 }

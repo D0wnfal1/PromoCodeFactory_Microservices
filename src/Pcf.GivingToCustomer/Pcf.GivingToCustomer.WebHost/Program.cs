@@ -15,6 +15,7 @@ builder.Services.AddDbContext<DataContext>(x =>
 {
 	//x.UseSqlite("Filename=PromocodeFactoryAdministrationDb.sqlite");
 	x.UseNpgsql(builder.Configuration.GetConnectionString("PromocodeFactoryGivingToCustomerDb"));
+	x.UseSnakeCaseNamingConvention();
 });
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -45,5 +46,15 @@ app.MapControllers();
 //	var dbInitializer = scope.ServiceProvider.GetRequiredService<IDbInitializer>();
 //	dbInitializer.InitializeDb();
 //}
+void SeedDatabase()
+{
+	using (var scope = app.Services.CreateScope())
+	{
+		var dbInitializer = scope.ServiceProvider.GetRequiredService<IDbInitializer>();
+		dbInitializer.InitializeDb();
+	}
+}
+
+SeedDatabase();
 
 app.Run();

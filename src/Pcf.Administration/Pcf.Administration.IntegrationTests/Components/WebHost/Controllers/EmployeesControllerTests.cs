@@ -1,4 +1,5 @@
 ﻿using FluentAssertions;
+using Microsoft.Extensions.Caching.Distributed;
 using Pcf.Administration.Core.Domain.Administration;
 using Pcf.Administration.DataAccess.Repositories;
 using Pcf.Administration.WebHost.Controllers;
@@ -10,10 +11,10 @@ namespace Pcf.Administration.IntegrationTests.Components.WebHost.Controllers
 	{
 		private EfRepository<Employee> _employeeRepository;
 		private EmployeesController _employeesController;
-        public EmployeesControllerTests(EfDatabaseFixture efDatabaseFixture)
+        public EmployeesControllerTests(EfDatabaseFixture efDatabaseFixture, IDistributedCache cache)
         {
 			_employeeRepository = new EfRepository<Employee>(efDatabaseFixture.DbContext);
-			_employeesController = new EmployeesController(_employeeRepository);
+			_employeesController = new EmployeesController(_employeeRepository, cache);
         }
 
 		[Fact]

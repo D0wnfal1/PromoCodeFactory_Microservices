@@ -14,6 +14,7 @@ builder.Services.AddScoped<IDbInitializer, EfDbInitializer>();
 builder.Services.AddDbContext<DataContext>(x =>
 {
 	x.UseNpgsql(builder.Configuration.GetConnectionString("PromocodeFactoryAdministrationDb"));
+	x.UseSnakeCaseNamingConvention();
 });
 
 // Add Redis cache
@@ -43,5 +44,16 @@ app.UseSwaggerUI();
 app.UseHttpsRedirection();
 app.UseAuthorization();
 app.MapControllers();
+
+void SeedDatabase()
+{
+	using (var scope = app.Services.CreateScope())
+	{
+		var dbInitializer = scope.ServiceProvider.GetRequiredService<IDbInitializer>();
+		dbInitializer.InitializeDb();
+	}
+}
+
+SeedDatabase();
 
 app.Run();
