@@ -1,5 +1,6 @@
 ﻿using FluentAssertions;
 using Microsoft.Extensions.Caching.Distributed;
+using Moq;
 using Pcf.Administration.Core.Domain.Administration;
 using Pcf.Administration.DataAccess.Repositories;
 using Pcf.Administration.WebHost.Controllers;
@@ -11,11 +12,14 @@ namespace Pcf.Administration.IntegrationTests.Components.WebHost.Controllers
 	{
 		private EfRepository<Employee> _employeeRepository;
 		private EmployeesController _employeesController;
-        public EmployeesControllerTests(EfDatabaseFixture efDatabaseFixture, IDistributedCache cache)
-        {
+		private Mock<IDistributedCache> _cacheMock;
+
+		public EmployeesControllerTests(EfDatabaseFixture efDatabaseFixture)
+		{
+			_cacheMock = new Mock<IDistributedCache>();
 			_employeeRepository = new EfRepository<Employee>(efDatabaseFixture.DbContext);
-			_employeesController = new EmployeesController(_employeeRepository, cache);
-        }
+			_employeesController = new EmployeesController(_employeeRepository, _cacheMock.Object);
+		}
 
 		[Fact]
 		public async Task GetEmployeeByIdAsync_ExistedEmployee_ExistedId()
@@ -29,5 +33,5 @@ namespace Pcf.Administration.IntegrationTests.Components.WebHost.Controllers
 			//Assert
 			result.Value.Id.Should().Be(expectedEmployeeId);
 		}
-    }
+	}
 }

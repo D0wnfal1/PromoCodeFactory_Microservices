@@ -29,14 +29,14 @@ namespace Pcf.ReceivingFromPartner.UnitTests.WebHost.Controllers.Partners
         {
             var partner = new Partner()
             {
-                Id = ObjectId.Parse("7d994823-8226-4273-b063-1a95f3cc1df8"),
+                Id = ObjectId.Parse("60d5ecf6a1f56c1f9c1a5a48"),
                 Name = "Superheroes",
                 IsActive = true,
                 PartnerLimits = new List<PartnerPromoCodeLimit>()
                 {
                     new PartnerPromoCodeLimit()
                     {
-                        Id = ObjectId.Parse("e00633a5-978a-420e-a7d6-3e1dab116393"),
+                        Id = ObjectId.Parse("60d5ecf6a1f56c1f9c1a5a49"),
                         CreateDate = new DateTime(2020, 07, 9),
                         EndDate = new DateTime(2020, 10, 9),
                         Limit = 100
@@ -51,7 +51,7 @@ namespace Pcf.ReceivingFromPartner.UnitTests.WebHost.Controllers.Partners
         public async void CancelPartnerPromoCodeLimitAsync_PartnerIsNotFound_ReturnsNotFound()
         {
             // Arrange
-            var partnerId = ObjectId.Parse("def47943-7aaf-44a1-ae21-05aa4948b165");
+            var partnerId = ObjectId.Parse("60d5ecf6a1f56c1f9c1a5a48");
             Partner partner = null;
             
             _partnersRepositoryMock.Setup(repo => repo.GetByIdAsync(partnerId))
@@ -68,7 +68,7 @@ namespace Pcf.ReceivingFromPartner.UnitTests.WebHost.Controllers.Partners
         public async void CancelPartnerPromoCodeLimitAsync_PartnerIsNotActive_ReturnsBadRequest()
         {
             // Arrange
-            var partnerId = ObjectId.Parse("def47943-7aaf-44a1-ae21-05aa4948b165");
+            var partnerId = ObjectId.Parse("60d5ecf6a1f56c1f9c1a5a48");
             var partner = CreateBasePartner();
             partner.IsActive = false;
             

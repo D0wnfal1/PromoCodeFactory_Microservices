@@ -9,17 +9,17 @@ namespace Pcf.ReceivingFromPartner.DataAccess.Data
 		{
 			new Preference()
 			{
-				Id = ObjectId.Parse("60d5ecf6a1f56c1f9c1a5a45"), // Пример корректного ObjectId
+				Id = ObjectId.Parse("60d5ecf6a1f56c1f9c1a5a45"), 
                 Name = "Theater",
 			},
 			new Preference()
 			{
-				Id = ObjectId.Parse("60d5ecf6a1f56c1f9c1a5a46"), // Пример корректного ObjectId
+				Id = ObjectId.Parse("60d5ecf6a1f56c1f9c1a5a46"), 
                 Name = "Family",
 			},
 			new Preference()
 			{
-				Id = ObjectId.Parse("60d5ecf6a1f56c1f9c1a5a47"), // Пример корректного ObjectId
+				Id = ObjectId.Parse("60d5ecf6a1f56c1f9c1a5a47"), 
                 Name = "Kids",
 			}
 		};

@@ -1,4 +1,4 @@
-﻿
+﻿using Pcf.GivingToCustomer.Core.Domain;
 using Pcf.GivingToCustomer.DataAccess;
 using Pcf.GivingToCustomer.DataAccess.Data;
 
@@ -23,8 +23,11 @@ namespace Pcf.GivingtoCustomer.IntegrationTests.Data
 			_dataContext.Database.EnsureDeleted();
 			_dataContext.Database.EnsureCreated();
 
+			_dataContext.ChangeTracker.Clear();
+
 			_dataContext.AddRange(TestDataFactory.Customers);
 			_dataContext.AddRange(TestDataFactory.Preferences);
+
 			_dataContext.SaveChanges();
 		}
 	}

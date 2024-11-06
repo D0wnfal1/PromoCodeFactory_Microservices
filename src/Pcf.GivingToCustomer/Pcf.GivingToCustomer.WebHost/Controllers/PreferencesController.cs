@@ -41,14 +41,19 @@ namespace Pcf.GivingToCustomer.WebHost.Controllers
 		/// Get Preference by Id
 		/// </summary>
 		/// <returns></returns>
-		[HttpGet($"Id")]
+		[HttpGet("{id}")]
 		public async Task<ActionResult<PreferenceResponse>> GetPreferencesByIdAsync(Guid id)
 		{
 			var preference = await _preferencesRepository.GetByIdAsync(id);
 
+			if (preference == null)
+			{
+				return NotFound();
+			}
+
 			var response = new PreferenceResponse() { Id = id, Name = preference.Name };
 
-			return response;
+			return Ok(response);
 		}
 	}
 }
