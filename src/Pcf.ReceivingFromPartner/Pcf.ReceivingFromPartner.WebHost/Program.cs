@@ -1,12 +1,15 @@
+using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using MongoDB.Driver;
 using Pcf.ReceivingFromPartner.Core.Abstractions.Gateways;
 using Pcf.ReceivingFromPartner.Core.Abstractions.Repositories;
+using Pcf.ReceivingFromPartner.Core.Services;
 using Pcf.ReceivingFromPartner.DataAccess;
 using Pcf.ReceivingFromPartner.DataAccess.Data;
 using Pcf.ReceivingFromPartner.Integration;
 using Pcf.ReceivingFromPartner.WebHost.Models;
+using NSwag.AspNetCore; 
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,8 +18,9 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 builder.Services.AddScoped(typeof(IRepository<>), typeof(MongoRepository<>));
 builder.Services.AddScoped<INotificationGateway, NotificationGateway>();
+builder.Services.AddScoped<INotificationGateway, NotificationGateway>();
 builder.Services.AddScoped<IDbInitializer, MongoDbInitializer>();
-
+builder.Services.AddScoped<PromocodeService>();
 
 builder.Services.AddHttpClient<IGivingPromoCodeToCustomerGateway, GivingPromoCodeToCustomerGateway>(c =>
 {
@@ -36,8 +40,26 @@ builder.Services.Configure<MongoSettings>(builder.Configuration.GetSection("Mong
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddOpenApiDocument(options =>
+{
+	options.Title = "PromoCode Factory Receiving from Partner API Doc";
+	options.Version = "1.0";
+});
+builder.Services.AddMassTransit(x =>
+{
+	x.UsingRabbitMq((context, cfg) =>
+	{
+		cfg.Host("rabbitmq://localhost", c =>
+		{
+			c.Username("guest");
+			c.Password("guest");
+		});
 
+		cfg.ClearSerialization();
+		cfg.UseRawJsonSerializer();
+		cfg.ConfigureEndpoints(context);
+	});
+});
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -62,7 +84,5 @@ void SeedDatabase()
 }
 
 SeedDatabase();
-
-
 
 app.Run();
