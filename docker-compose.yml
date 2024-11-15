@@ -1,5 +1,5 @@
 services:
-  # Administration Api
+    # Administration Api
   promocode-factory-administration-api:
     build: src/Pcf.Administration/
     container_name: 'promocode-factory-administration-api'
@@ -8,22 +8,31 @@ services:
       - "5583:8080"
     environment:
       - "ConnectionStrings:PromocodeFactoryAdministrationDb=Host=promocode-factory-administration-db;Database=promocode_factory_administration_db;Username=postgres;Password=docker" 
-      - "Redis:ConnectionString=promocode-factory-redis:6379" 
+      - "Redis:ConnectionString=promocode-factory-redis:6379"
+      - "RabbitMQ:ConnectionString=amqp://guest:guest@rabbit-mq:5672"  # Добавляем строку подключения к RabbitMQ
     depends_on: 
       - promocode-factory-administration-db
       - promocode-factory-redis
+      - rabbit-mq
 
   # Administration Db
   promocode-factory-administration-db:
-    image: "postgres:latest"
+    image: "postgres:14"  # Використовуємо конкретну версію
     container_name: 'promocode-factory-administration-db'
-    restart: always 
+    restart: always
     ports:
       - 5433:5432
     environment: 
       - POSTGRES_PASSWORD=docker
       - POSTGRES_USER=postgres
       - POSTGRES_DB=promocode_factory_administration_db
+    volumes:
+      - promocode-factory-administration-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "pg_isready", "-h", "localhost", "-U", "postgres"]
+      interval: 30s
+      retries: 5
+      timeout: 10s
 
   # ReceivingFromPartner Api
   promocode-factory-receiving-from-partner-api:
@@ -36,18 +45,22 @@ services:
       - ASPNETCORE_ENVIRONMENT=Development
       - ConnectionStrings__MongoDb=mongodb://promocode-factory-receiving-from-partner-db:27017
       - "IntegrationSettings:GivingToCustomerApiUrl=http://promocode-factory-giving-to-customer-api"    
-      - "IntegrationSettings:AdministrationApiUrl=http://promocode-factory-administration-api"       
+      - "IntegrationSettings:AdministrationApiUrl=http://promocode-factory-administration-api"  
+      - "RabbitMQ:ConnectionString=amqp://guest:guest@rabbit-mq:5672"  # Добавляем строку подключения к RabbitMQ
     depends_on: 
       - promocode-factory-receiving-from-partner-db
+      - rabbit-mq
 
   # ReceivingFromPartner Db (MongoDB)
   promocode-factory-receiving-from-partner-db:
-    image: "mongo:latest"
+    image: "mongo:5"  # Використовуємо конкретну версію
     container_name: 'promocode-factory-receiving-from-partner-db'
     environment:
       - MONGO_INITDB_DATABASE=promocode_factory_receivingFromPartner_mongodb
     ports:
       - 27017:27017
+    volumes:
+      - promocode-factory-receiving-from-partner-db-data:/data/db
 
   # GivingToCustomer Api
   promocode-factory-giving-to-customer-api:
@@ -59,12 +72,14 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - "ConnectionStrings:PromocodeFactoryGivingToCustomerDb=Host=promocode-factory-giving-to-customer-db;Database=promocode_factory_giving_to_customer_db;Username=postgres;Password=docker"
+      - "RabbitMQ:ConnectionString=amqp://guest:guest@rabbit-mq:5672"  # Добавляем строку подключения к RabbitMQ
     depends_on:
       - promocode-factory-giving-to-customer-db
+      - rabbit-mq
 
   # GivingToCustomer Db
   promocode-factory-giving-to-customer-db:
-    image: "postgres:latest"
+    image: "postgres:14"  # Використовуємо конкретну версію
     container_name: 'promocode-factory-giving-to-customer-db'
     restart: always
     ports:
@@ -73,12 +88,19 @@ services:
       - POSTGRES_PASSWORD=docker
       - POSTGRES_USER=postgres
       - POSTGRES_DB=promocode_factory_giving_to_customer_db
+    volumes:
+      - promocode-factory-giving-to-customer-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "pg_isready", "-h", "localhost", "-U", "postgres"]
+      interval: 30s
+      retries: 5
+      timeout: 10s
 
   # Redis service
   promocode-factory-redis:
     image: "redis:alpine"
     container_name: 'promocode-factory-redis'
-    restart: always 
+    restart: always
     ports:
       - 6379:6379
     healthcheck:
@@ -86,21 +108,24 @@ services:
       interval: 30s
       timeout: 10s
       retries: 5
-      
+
   # RabbitMQ
   rabbit-mq:
     image: rabbitmq:3-management
+    container_name: 'rabbit-mq'
     restart: always
     hostname: rabbitmqhost
     environment:
-        RABBITMQ_DEFAULT_USER:
-          guest
-        RABBITMQ_DEFAULT_PASS:
-          guest
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
     volumes:
-    - rabbitmq_data:/var/lib/rabbitmq
+      - rabbitmq_data:/var/lib/rabbitmq
     ports:
-    - "5672:5672"
-    - "15672:15672"
+      - "5672:5672"
+      - "15672:15672"
+
 volumes:
+  promocode-factory-administration-db-data:
+  promocode-factory-receiving-from-partner-db-data:
+  promocode-factory-giving-to-customer-db-data:
   rabbitmq_data:

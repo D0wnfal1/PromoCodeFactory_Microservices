@@ -4,8 +4,8 @@ using System.Threading.Tasks;
 using MassTransit;
 using MongoDB.Bson;
 using Pcf.ReceivingFromPartner.Core.Abstractions.Gateways;
-using Pcf.Administration.Core.Services;
 using Pcf.ReceivingFromPartner.Core.Domain;
+using Pcf.ReceivingFromPartner.Integration.Dto;
 
 namespace Pcf.ReceivingFromPartner.Integration
 {

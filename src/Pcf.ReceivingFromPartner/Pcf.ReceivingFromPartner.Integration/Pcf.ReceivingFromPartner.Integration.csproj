@@ -12,7 +12,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Pcf.Administration\Pcf.Administration.Core\Pcf.Administration.Core.csproj" />
     <ProjectReference Include="..\Pcf.ReceivingFromPartner.Core\Pcf.ReceivingFromPartner.Core.csproj" />
   </ItemGroup>
 
